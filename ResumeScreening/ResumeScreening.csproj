@@ -33,16 +33,16 @@
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="Aspose.Cells">
-      <HintPath>C:\Users\Administrator\Desktop\Aspose.Cells_19.11\net2.0\Aspose.Cells.dll</HintPath>
+      <HintPath>Dll\Aspose.Cells.dll</HintPath>
     </Reference>
     <Reference Include="Aspose.Cells.GridDesktop">
-      <HintPath>C:\Users\Administrator\Desktop\Aspose.Cells_19.11\net2.0\Aspose.Cells.GridDesktop.dll</HintPath>
+      <HintPath>Dll\Aspose.Cells.GridDesktop.dll</HintPath>
     </Reference>
     <Reference Include="Aspose.Cells.GridWeb">
-      <HintPath>C:\Users\Administrator\Desktop\Aspose.Cells_19.11\net2.0\Aspose.Cells.GridWeb.dll</HintPath>
+      <HintPath>Dll\Aspose.Cells.GridWeb.dll</HintPath>
     </Reference>
     <Reference Include="Aspose.Words">
-      <HintPath>C:\Users\Administrator\Desktop\Aspose.Words_19.12\net2.0\Aspose.Words.dll</HintPath>
+      <HintPath>Dll\Aspose.Words.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />

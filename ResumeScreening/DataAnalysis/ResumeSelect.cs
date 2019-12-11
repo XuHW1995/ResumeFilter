@@ -43,6 +43,10 @@ namespace ResumeScreening
         {
             Body docContent = resumeDoc.FirstSection.Body;
             ResumeData thisData = new ResumeData();
+
+            //期望地点
+            thisData.TargetPlace = ResumeFormatHelp.DefaultFormat(docContent.Tables[(int)ResumeContentEnum.WorkFuture].Rows[3].Cells[1].GetText());
+
             //简历编号
             thisData.ResumeId = ResumeFormatHelp.FormatResumeId(docContent.Tables[(int)ResumeContentEnum.IdContent].Rows[1].Cells[0].GetText());
 
