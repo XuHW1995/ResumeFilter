@@ -8,13 +8,17 @@ using System.Text;
 using System.Windows.Forms;
 using Aspose.Words;
 using System.IO;
+using System.Threading;
 
 namespace ResumeScreening
 {
     public partial class MainForm : Form
     {
+        #region 数据定义
         public List<ResumeData> resumeList = new List<ResumeData>();
-        private string m_ExportExcelName = "简历筛选表.xlsx"; 
+        private string m_ExportExcelName = "简历筛选表.xlsx";
+        private bool isAnalysis = false;
+        #endregion
 
         public MainForm()
         {
@@ -54,34 +58,6 @@ namespace ResumeScreening
             openFileDialog1.ShowDialog();
         }
 
-        /// <summary>
-        /// 开始筛选按钮
-        /// </summary>
-        /// <param name="sender"></param>
-        /// <param name="e"></param>
-        private void beginButton_Click(object sender, EventArgs e)
-        {
-            if (File.Exists(SelectBox.Text))
-            {
-                AnalysisOne();
-            }
-            else if (Directory.Exists(SelectBox.Text))
-            {
-                if (!string.IsNullOrEmpty(SaveBox.Text))
-                {
-                    BatchAnalysis();
-                }
-                else
-                {
-                    MsgBox.Text = "不选输出目录分析完存哪？？？";
-                }
-            }
-            else
-            {
-                MsgBox.Text = "选择目录或文件不合法！！！";
-            }
-        }
-
         private void SavePathBox_TextChanged(object sender, EventArgs e)
         {
 
@@ -100,34 +76,76 @@ namespace ResumeScreening
             }
         }
 
-        #region
+        /// <summary>
+        /// 开始筛选按钮
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void beginButton_Click(object sender, EventArgs e)
+        {
+            if (isAnalysis)
+            {
+                MsgBox.Text = "正在分析中！！！";
+                return;
+            }
+
+            resumeList.Clear();
+
+            if (File.Exists(SelectBox.Text))
+            {
+                AnalysisOne();
+            }
+            else if (Directory.Exists(SelectBox.Text))
+            {
+                if (!string.IsNullOrEmpty(SaveBox.Text))
+                {
+                    Thread childThread = new Thread(BatchAnalysis);
+                    childThread.Start();                  
+                }
+                else
+                {
+                    MsgBox.Text = "不选输出目录分析完存哪？？？";
+                }
+            }
+            else
+            {
+                MsgBox.Text = "选择目录或文件不合法！！！";
+            }
+        }
+
+        #region 简历筛选方法
         /// <summary>
         /// 批量简历分析
         /// </summary>
         private void BatchAnalysis()
         {
-            DirectoryInfo folder = new DirectoryInfo(SelectBox.Text);
-            FileInfo[] docFiles = folder.GetFiles("*.doc");
+            isAnalysis = true;
+            int count = 0;
+            int failCount = 0;
+            string failName = "";
 
-            foreach (FileInfo file in docFiles)
+            var fileNames =  Directory.GetFiles(SelectBox.Text, "*.*", SearchOption.AllDirectories).Where(s => s.EndsWith(".doc") || s.EndsWith(".docx"));
+            foreach(var fileName in fileNames)
             {
-                Document thisDoc = new Document(file.FullName);
+                count ++;
+                FileInfo thisFile = new FileInfo(fileName);              
+                Document thisDoc = new Document(thisFile.FullName);
                 ResumeData thisResumeData = ResumeSelect.CheckResume(thisDoc);
-                resumeList.Add(thisResumeData);
-            }
-
-            FileInfo[] docxFiles = folder.GetFiles("*.docx");
-            foreach (FileInfo file in docxFiles)
-            {
-                Document thisDoc = new Document(file.FullName);
-                ResumeData thisResumeData = ResumeSelect.CheckResume(thisDoc);
-                resumeList.Add(thisResumeData);
+                if (thisResumeData!= null)
+                {
+                    resumeList.Add(thisResumeData);
+                    PrintMsg(thisFile.Name + "分析完毕！！！\n" + "已分析份数：" + count);
+                }
+                else
+                {
+                    failCount++;
+                    failName += "\n" + fileName;
+                }
             }
 
             ExportHelp.DataExport(resumeList, SaveBox.Text + "\\" + m_ExportExcelName);
-
-
-            MsgBox.Text = "******************简历筛选完毕*****************\n共筛选简历份数："+ resumeList.Count;
+            isAnalysis = false;           
+            PrintMsg(string.Format("简历分析完毕,总共分析成功份数：{0}, 失败数：{1} \n 失败文件：\n{2}", count, failCount, failName));
         }
 
         /// <summary>
@@ -140,6 +158,22 @@ namespace ResumeScreening
             MsgBox.Text = thisResume.ToString();
         }
 
+        /// <summary>
+        /// 线程安全输出日志
+        /// </summary>
+        /// <param name="logStr"></param>
+        private void PrintMsg(string logStr)
+        {
+            if (MsgBox.InvokeRequired)
+            {
+                var d = new Action<string>(PrintMsg);
+                MsgBox.Invoke(d, new object[] { logStr });
+            }
+            else
+            {
+                MsgBox.Text = logStr;
+            }
+        }
         #endregion
     }
 }

@@ -24,7 +24,7 @@ namespace ResumeScreening
         /// <summary>
         /// 学校名字
         /// </summary>
-        public string SchoolName;
+        public string SchoolName = "";
         /// <summary>
         /// 在校时间
         /// </summary>
@@ -32,15 +32,15 @@ namespace ResumeScreening
         /// <summary>
         /// 专业名
         /// </summary>
-        public string Specialty;
+        public string Specialty = "";
         /// <summary>
         /// 教育等级
         /// </summary>
-        public EducationLevel Level;
+        public EducationLevel Level = EducationLevel.Senior;
         /// <summary>
         /// 教育名字
         /// </summary>
-        public string LevelName;
+        public string LevelName = "";
 
         public EducationInfo(string schoolName, string specialty, EducationLevel level, string levelName)
         {
@@ -56,37 +56,37 @@ namespace ResumeScreening
         /// <summary>
         /// 期望工作地
         /// </summary>
-        public string TargetPlace;
+        public string TargetPlace = "";
 
         /// <summary>
         /// 简历标号
         /// </summary>
-        public string ResumeId;
+        public string ResumeId = "";
 
         /// <summary>
         /// 姓名
         /// </summary>
-        public string Name;
+        public string Name = "";
 
         /// <summary>
         /// 性别
         /// </summary>
-        public string Gender;
+        public string Gender = "";
 
         /// <summary>
         /// 年龄
         /// </summary>
-        public string Age;
+        public string Age = "";
 
         /// <summary>
         /// 手机号
         /// </summary>
-        public string PhoneNumber;
+        public string PhoneNumber = "";
 
         /// <summary>
         /// 电子邮箱
         /// </summary>
-        public string EmailAddress;
+        public string EmailAddress = "";
 
         /// <summary>
         /// 教育信息
@@ -96,12 +96,12 @@ namespace ResumeScreening
         /// <summary>
         /// 当前公司名字
         /// </summary>
-        public string CurrentCompanyName;
+        public string CurrentCompanyName = "";
 
         /// <summary>
         /// 最高学历信息
         /// </summary>
-        public EducationInfo MaxEducationInfo;
+        public EducationInfo MaxEducationInfo = new EducationInfo("","",EducationLevel.Senior,"");
 
         public override string ToString()
         {

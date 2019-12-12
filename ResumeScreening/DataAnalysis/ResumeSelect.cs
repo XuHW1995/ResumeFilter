@@ -27,11 +27,57 @@ namespace ResumeScreening
         /// </summary>
         public enum ResumeContentEnum
         {
-            IdContent = 0,
-            PersonInfo = 2,
-            CurWorkInfo = 3,
-            WorkFuture = 4,
-            Education = 10,
+            IdContent,
+            PersonInfo ,
+            CurWorkInfo,
+            WorkFuture,
+            Education,
+        }
+
+        /// <summary>
+        /// 分析当前简历，确认表格ID划分
+        /// </summary>
+        /// <returns></returns>
+        private static Dictionary<ResumeContentEnum, Table> GetInfoName2TableDic(Document resumeDoc)
+        {
+            Dictionary<ResumeContentEnum, Table> infoName2Table = new Dictionary<ResumeContentEnum, Table>();
+
+            for (int sectionIndex = 0; sectionIndex < resumeDoc.Sections.Count; sectionIndex++)
+            {
+                TableCollection thisSectionTables = resumeDoc.Sections[sectionIndex].Body.Tables;
+                for (int tableIndex = 0; tableIndex < thisSectionTables.Count; tableIndex ++)
+                {
+                    //简历编号默认在第0章节第0个表
+                    if (sectionIndex == 0 && tableIndex == 0)
+                    {
+                        infoName2Table.Add(ResumeContentEnum.IdContent, thisSectionTables[tableIndex]);
+                    }
+
+                    string tableStr = ResumeFormatHelp.DefaultFormat(thisSectionTables[tableIndex].GetText());
+                    //TODO 个人信息和下面的三栏不在一个段落里识别不了，是个bug
+                    if (tableStr == "个人信息")
+                    {
+                        if (thisSectionTables.Count > tableIndex + 3)
+                        {
+                            infoName2Table.Add(ResumeContentEnum.PersonInfo, thisSectionTables[tableIndex + 1]);
+                            infoName2Table.Add(ResumeContentEnum.CurWorkInfo, thisSectionTables[tableIndex + 2]);
+                            infoName2Table.Add(ResumeContentEnum.WorkFuture, thisSectionTables[tableIndex + 3]);
+                        }
+                    }
+
+                    //TODO 教育经历和 学校不在一个段落里识别不了，是个bug
+                    if (tableStr == "教育经历")
+                    {
+                        if (thisSectionTables.Count >tableIndex + 1)
+                        {
+                            infoName2Table.Add(ResumeContentEnum.Education, thisSectionTables[tableIndex + 1]);
+                        }
+                    }
+
+                }
+            }
+
+            return infoName2Table;
         }
 
         /// <summary>
@@ -41,37 +87,60 @@ namespace ResumeScreening
         /// <returns></returns>
         public static ResumeData CheckResume(Document resumeDoc)
         {
-            Body docContent = resumeDoc.FirstSection.Body;
-            ResumeData thisData = new ResumeData();
+            try
+            {
+                ResumeData thisData = new ResumeData();
+                Dictionary<ResumeContentEnum, Table> thisResumeTable = GetInfoName2TableDic(resumeDoc);
 
-            //期望地点
-            thisData.TargetPlace = ResumeFormatHelp.DefaultFormat(docContent.Tables[(int)ResumeContentEnum.WorkFuture].Rows[3].Cells[1].GetText());
+                //期望地点
+                if (thisResumeTable.ContainsKey(ResumeContentEnum.WorkFuture))
+                {
+                    thisData.TargetPlace = ResumeFormatHelp.DefaultFormat(thisResumeTable[ResumeContentEnum.WorkFuture].Rows[3].Cells[1].GetText());
+                }
 
-            //简历编号
-            thisData.ResumeId = ResumeFormatHelp.FormatResumeId(docContent.Tables[(int)ResumeContentEnum.IdContent].Rows[1].Cells[0].GetText());
+                //简历编号
+                if (thisResumeTable.ContainsKey(ResumeContentEnum.IdContent))
+                {                
+                    thisData.ResumeId = ResumeFormatHelp.FormatResumeId(thisResumeTable[ResumeContentEnum.IdContent].Rows[1].Cells[0].GetText());
+                }
 
-            //姓名
-            thisData.Name = ResumeFormatHelp.DefaultFormat(docContent.Tables[(int)ResumeContentEnum.PersonInfo].Rows[0].Cells[1].GetText());
+                //基本信息
+                if (thisResumeTable.ContainsKey(ResumeContentEnum.PersonInfo))
+                {
+                    //姓名
+                    thisData.Name = ResumeFormatHelp.DefaultFormat(thisResumeTable[ResumeContentEnum.PersonInfo].Rows[0].Cells[1].GetText());
 
-            //性别
-            thisData.Gender = ResumeFormatHelp.DefaultFormat(docContent.Tables[(int)ResumeContentEnum.PersonInfo].Rows[0].Cells[3].GetText());
+                    //性别
+                    thisData.Gender = ResumeFormatHelp.DefaultFormat(thisResumeTable[ResumeContentEnum.PersonInfo].Rows[0].Cells[3].GetText());
 
-            //手机
-            thisData.PhoneNumber = ResumeFormatHelp.DefaultFormat(docContent.Tables[(int)ResumeContentEnum.PersonInfo].Rows[1].Cells[1].GetText());
+                    //手机
+                    thisData.PhoneNumber = ResumeFormatHelp.DefaultFormat(thisResumeTable[ResumeContentEnum.PersonInfo].Rows[1].Cells[1].GetText());
 
-            //年龄
-            thisData.Age = ResumeFormatHelp.DefaultFormat(docContent.Tables[(int)ResumeContentEnum.PersonInfo].Rows[1].Cells[3].GetText());
+                    //年龄
+                    thisData.Age = ResumeFormatHelp.DefaultFormat(thisResumeTable[ResumeContentEnum.PersonInfo].Rows[1].Cells[3].GetText());
 
-            //电子邮箱
-            thisData.EmailAddress = ResumeFormatHelp.DefaultFormat(docContent.Tables[(int)ResumeContentEnum.PersonInfo].Rows[2].Cells[1].GetText());
+                    //电子邮箱
+                    thisData.EmailAddress = ResumeFormatHelp.DefaultFormat(thisResumeTable[ResumeContentEnum.PersonInfo].Rows[2].Cells[1].GetText());
+                }
 
-            //教育经历
-            thisData.MaxEducationInfo = GetMaxEducationData(docContent.Tables[(int)ResumeContentEnum.Education]);
+                //教育经历
+                if (thisResumeTable.ContainsKey(ResumeContentEnum.Education))
+                {
+                    thisData.MaxEducationInfo = GetMaxEducationData(thisResumeTable[ResumeContentEnum.Education]);
+                }
 
-            //当前公司名字
-            thisData.CurrentCompanyName = ResumeFormatHelp.DefaultFormat(docContent.Tables[(int)ResumeContentEnum.CurWorkInfo].Rows[1].Cells[3].GetText());
+                //当前公司名字
+                if (thisResumeTable.ContainsKey(ResumeContentEnum.CurWorkInfo))
+                {
+                    thisData.CurrentCompanyName = ResumeFormatHelp.DefaultFormat(thisResumeTable[ResumeContentEnum.CurWorkInfo].Rows[1].Cells[3].GetText());
+                }
 
-            return thisData;
+                return thisData;
+            }
+            catch
+            {
+                return null;
+            }           
         }
 
         /// <summary>
