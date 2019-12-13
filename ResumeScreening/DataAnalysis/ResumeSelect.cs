@@ -73,7 +73,6 @@ namespace ResumeScreening
                             infoName2Table.Add(ResumeContentEnum.Education, thisSectionTables[tableIndex + 1]);
                         }
                     }
-
                 }
             }
 
