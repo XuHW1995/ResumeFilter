@@ -52,7 +52,6 @@ namespace ResumeScreening
                     {
                         infoName2Table.Add(ResumeContentEnum.IdContent, thisSectionTables[tableIndex]);
                     }
-
                     string tableStr = ResumeFormatHelp.DefaultFormat(thisSectionTables[tableIndex].GetText());
                     //TODO 个人信息和下面的三栏不在一个段落里识别不了，是个bug
                     if (tableStr == "个人信息")
@@ -64,7 +63,6 @@ namespace ResumeScreening
                             infoName2Table.Add(ResumeContentEnum.WorkFuture, thisSectionTables[tableIndex + 3]);
                         }
                     }
-
                     //TODO 教育经历和 学校不在一个段落里识别不了，是个bug
                     if (tableStr == "教育经历")
                     {
