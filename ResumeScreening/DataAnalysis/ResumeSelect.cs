@@ -147,7 +147,7 @@ namespace ResumeScreening
         /// <returns></returns>
         private static EducationInfo GetMaxEducationData(Table educationTable)
         {
-            EducationInfo maxEducationInfo = null;
+            EducationInfo maxEducationInfo = new EducationInfo("", "", EducationLevel.Senior, "");
             EducationLevel maxlevel = EducationLevel.Senior;
 
             for (int i = 0; i<= educationTable.Rows.Count-1; i++)

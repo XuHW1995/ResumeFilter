@@ -101,7 +101,7 @@ namespace ResumeScreening
         /// <summary>
         /// 最高学历信息
         /// </summary>
-        public EducationInfo MaxEducationInfo = new EducationInfo("","",EducationLevel.Senior,"");
+        public EducationInfo MaxEducationInfo = new EducationInfo("", "", EducationLevel.Senior, "");
 
         public override string ToString()
         {
